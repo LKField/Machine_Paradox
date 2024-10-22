@@ -15,7 +15,7 @@ void setup() {
   // initialize the RGB LEDs 
   strip.begin();
   strip.show();
-  strip.setBrightness(50);
+  strip.setBrightness(100);
 }
 
 void loop() {
