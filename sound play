@@ -1,15 +1,11 @@
 #include <DFRobotDFPlayerMini.h>
-#include <SoftwareSerial.h>
 
 #define SERIAL_BAUD 9600
 #define SOFTWARE_SERIAL_BAUD 9600
 #define BUSY LOW
 
 const byte BUSY_PIN = 9;  //DFR busy pin is on D9
-const int SOFTWARE_SERIAL_RX = 44;
-const int SOFTWARE_SERIAL_TX = 43;
 
-SoftwareSerial mySoftwareSerial(SOFTWARE_SERIAL_RX, SOFTWARE_SERIAL_TX);  // RX, TX
 DFRobotDFPlayerMini myDFPlayer;
 
 // Play DFR audio and check for playback completion
@@ -27,7 +23,7 @@ void setup() {
   while (!Serial) {
     ;  // wait for serial port to connect. Needed for native USB
   }
-  mySoftwareSerial.begin(9600);
+  Serial0.begin(9600);
   delay(10);
 
   pinMode(BUSY_PIN, INPUT);
@@ -35,7 +31,7 @@ void setup() {
   Serial.println("Initializing DFPlayer...");
 
   // Initialize the DFPlayer Mini
-  if (!myDFPlayer.begin(mySoftwareSerial)) {
+  if (!myDFPlayer.begin(Serial0)) {
     Serial.println("DFPlayer Mini not detected. Please check connections and if SD card is inserted.");
     while (true) {
       ;
@@ -44,7 +40,7 @@ void setup() {
   Serial.println("DFPlayer initialized!");
 
   // myDFPlayer.setTimeOut(500);
-  myDFPlayer.volume(10);
+  myDFPlayer.volume(30);
   // myDFPlayer.EQ(DFPLAYER_EQ_NORMAL);
   // myDFPlayer.outputDevice(DFPLAYER_DEVICE_SD);
   // playAudio(1);
@@ -52,22 +48,11 @@ void setup() {
 
 void loop() {
   Serial.println("Playing file #1");
-  playAudio(1);
-
-  Serial.println("Playing file #2");
-  playAudio(2);
-
-  Serial.println("Playing file #3");
-  playAudio(3);
-
-  Serial.println("Playing file #4");
-  playAudio(4);
-
-  Serial.println("Playing file #5");
-  playAudio(5);
-
-  Serial.println("Playing file #6");
-  playAudio(6);
-
+  //playAudio(0);
+  myDFPlayer.play(1);
+  while (digitalRead(BUSY_PIN) == BUSY) {
+    ;  // This loop executes while the DFR BUSY pin is LOW indicating playback in progress.
+  }
+  //delay(100);
   Serial.println("");
 }
