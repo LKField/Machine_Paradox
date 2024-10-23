@@ -1,10 +1,11 @@
+// This code will read a pushbutton and a capacitive sensor and change the RGB LEDs accordingly 
 #include <Adafruit_NeoPixel.h>
 
 // Define the LED, Button, and Capacitive Sensor Pins as constants 
 #define LED_PIN 21
 #define LED_COUNT 10
 #define BUTTON_PIN 11
-#define CAP_PIN 4
+#define CAP_PIN 8
 
 // Define the touch sensor and threshold 
 long TR;
@@ -49,8 +50,7 @@ void loop() {
       setRGB('B');    // RGBs turn ON Blue 
       //PLAY CAPACITIVE SENSOR SOUND HERE 
       Serial.println("PLAY CAPACITIVE SENSOR SOUND HERE");
-      
-      setRGB('R');    // RGBs turn ON Red 
+      delay(100);     // delay to keep the blue on - will be removed when audio plays 
     }
      else {   // if the capacitive sensor is NOT pressed 
       setRGB('R');    // RGBs turn ON Red 
@@ -61,17 +61,22 @@ void loop() {
 // RGB color defining function 
 void setRGB(char color) {
   if (color == 'R') {
+    strip.clear();
+    strip.show();
     // RGBs turn ON RED 'fire'
     Serial.println("Color set to Red Fire");
     for(int i = strip.numPixels()-1; i >= 0; i--){
-      strip.setPixelColor(i, random(100, 200), random(50), 0, 0);   // random brightness of LEDs to try to create red 'fire' effect 
+      strip.setPixelColor(i, random(100, 255), random(50), 0, 0);   // random brightness of LEDs to try to create red 'fire' effect 
       strip.show();
     }
   } else if (color == 'B') {
+      strip.clear();
+      strip.show();
       // RGBs turn ON BLUE 'fire 
       Serial.println("Color set to Blue Fire");
       for(int i = strip.numPixels()-1; i >= 0; i--){
-        strip.setPixelColor(i, 0, 0, random(150, 255), 0);   // random brightness of LEDs to try to create blue 'fire' effect 
+        // strip.setPixelColor(i, 0, 0, random(200, 255), 0);   // random brightness of LEDs to try to create blue 'fire' effect 
+        strip.setPixelColor(i, 0, random(50), random(100, 255), 0);   // random brightness of LEDs to try to create blue 'fire' effect 
         strip.show();
       }
   } else if (color == 'O') {
