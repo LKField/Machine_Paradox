@@ -18,7 +18,7 @@ const byte BUSY_PIN = 9;  //DFR busy pin is on D9
 long TR;                  // define the touch sensor 
 long pan_thresh = 90000;  // define the pan threshold 
 
-int buttonState = 0;  // variable for reading the pushbutton status
+bool buttonState = 0;  // variable for reading the pushbutton status
 bool knobState = 0;
 
 int new_index = 3; // index for media file
@@ -37,7 +37,6 @@ void playAudio(int fileNumber) {
   //   ;  // This loop executes while the DFR BUSY pin is LOW indicating playback in progress.
   // }
 }
-
 
 void setup() {
   Serial.begin(9600);
@@ -78,67 +77,56 @@ void setup() {
 }
 
 void loop() {
-  knobState = digitalRead(KNOB_PIN);
+  knobState = digitalRead(KNOB_PIN);                // read KNOB_PIN 
 
-  if (knobState == HIGH) {
-    //digitalWrite(LED_PIN, LOW);  // turn the LED on (HIGH is the voltage level)
-    myDFPlayer.play(1);
-    Serial.println("Knob ON!");
-   // knobState = 1;
+  if (knobState == HIGH) {                          // proceed with code if knobState is HIGH 
+    myDFPlayer.play(1);                             // play "That's not how you turn me on, darling"
+    strip.setBrightness(10);                        // set 'fire' to low 
+    Serial.print("Knob State: ");             
     Serial.println(knobState);
-    strip.setBrightness(10);
-    //setRGB('B');
-  //  TR = touchRead(TR_PIN);
     
     while (knobState == HIGH) {
-      digitalWrite(LED_PIN, HIGH);
-      buttonState = digitalRead(BUTTON_PIN);
-      TR = touchRead(TR_PIN);
-      delay(100);
-      Serial.println(TR);
-      //strip.setBrightness(100);
-      setRGB('B');
-    //  new_index = random(4,7);
-
-      if (TR > pan_thresh) {
-        myDFPlayer.play(2);
-      //  Serial.println("Ring Touched");
-        while (TR > pan_thresh) {
-          strip.setBrightness(10);
-          setRGB('R');
-          TR = touchRead(TR_PIN);
-          Serial.print("Capacitive is pressed ");
-          Serial.println(TR);
-        }
+      digitalWrite(LED_PIN, HIGH);                  // turn front indicator light on
+      setRGB('B');                                  // turn RGB LEDs to 'blue fire'
+      buttonState = digitalRead(BUTTON_PIN);        // read BUTTON_PIN
+      digitalRead(BUSY_PIN);                        // read BUSY_PIN 
+      TR = touchRead(TR_PIN);                       // read TR for capacitive touch 
+      delay(100);                                   // delay to allow cap touch read 
+    //  Serial.println(TR);
+      
+    if (buttonState == HIGH && BUSY == LOW){        // button press code 
+      strip.setBrightness(100);                     // set 'fire' to high 
+      new_index = random(min_index,max_index+1);    // random index generator to audio file 
+      Serial.println(new_index);
+      myDFPlayer.play(new_index);                   // play the random audio file 
+        // Serial.print("Button State: ");
+        // Serial.println(TR);
       }
-      if (buttonState == HIGH){
-        new_index = random(min_index,max_index+1);
-      //  Serial.println(new_index);
-        myDFPlayer.play(new_index);
-      //  Serial.println("Knob ON Button Pressed!");
-        strip.setBrightness(100);
-        //setRGB('B');
-        //TR = touchRead(TR_PIN);
-        Serial.print("Button is pressed ");
-        Serial.println(TR);
-
-      } else { // No input is being activated
-        // Serial.println("Knob On Button NOT Pressed");
-        //TR = touchRead(TR_PIN);
-        Serial.print("No input is pressed ");
+      else if (TR > pan_thresh && BUSY == LOW) {    // capacitive touch sensor code 
+        myDFPlayer.play(2);                         // play "No, no, touch me where I'm hot"
+        strip.setBrightness(10);
+        setRGB('R');
+      //  Serial.print("Capacitive Touch State: ");
+      //  Serial.println(TR)
+        while (TR > pan_thresh) {                   // while the threshold is met 
+          TR = touchRead(TR_PIN);                   // read TR_PIN again 
+          delay(100);                               // delay to allow cap touch read 
+          Serial.print("Nada");
+        }
+      } else if (BUSY == LOW) {                     // No input is being activated
+        Serial.print("No inputs pressed: ");
         Serial.println(TR);
         strip.setBrightness(10);
       }
-    knobState = digitalRead(KNOB_PIN);
+    knobState = digitalRead(KNOB_PIN);              // reread the KNOB_PIN value 
     }
 
-  } else {
-  //  Serial.println("Knob OFF!");
-    digitalWrite(LED_PIN, LOW);
-    knobState = 0;
+  } else {                                          // knobState is LOW - turn everything off 
+  //  Serial.print("Knob State: ");
   //  Serial.println(knobState);
-    delay(10);
+    digitalWrite(LED_PIN, LOW);
     setRGB('O');
+    delay(10);
   }
 }
 
@@ -160,7 +148,6 @@ void setRGB(char color) {
       // RGBs turn ON BLUE 'fire 
       //Serial.println("Color set to Blue Fire");
       for(int i = strip.numPixels()-1; i >= 0; i--){
-        // strip.setPixelColor(i, 0, 0, random(200, 255), 0);   // random brightness of LEDs to try to create blue 'fire' effect 
         strip.setPixelColor(i, 0, random(50), random(100, 255), 0);   // random brightness of LEDs to try to create blue 'fire' effect 
         strip.show();
       }
