@@ -1,0 +1,92 @@
+#include <DFRobotDFPlayerMini.h>
+
+#define SERIAL_BAUD 9600
+#define SOFTWARE_SERIAL_BAUD 9600
+#define BUSY LOW
+#define BUTTON_PIN 11
+#define ButtonPush 5
+#define KNOB_PIN 2
+#define LED_PIN 7
+
+const byte BUSY_PIN = 9;  //DFR busy pin is on D9
+
+int buttonState = 0;  // variable for reading the pushbutton status
+int knobState = 0;
+
+DFRobotDFPlayerMini myDFPlayer;
+
+// Play DFR audio and check for playback completion
+void playAudio(int fileNumber) {
+  myDFPlayer.playMp3Folder(fileNumber);
+  delay(11000);
+  // while (digitalRead(BUSY_PIN) == BUSY) {
+  //   ;  // This loop executes while the DFR BUSY pin is LOW indicating playback in progress.
+  // }
+}
+
+
+void setup() {
+  Serial.begin(9600);
+  while (!Serial) {
+    ;  // wait for serial port to connect. Needed for native USB
+  }
+  Serial0.begin(9600);
+  delay(10);
+
+  pinMode(BUSY_PIN, INPUT);
+
+  // initialize the pushbutton pin as an input:
+  pinMode(BUTTON_PIN, INPUT);
+
+  pinMode(KNOB_PIN, INPUT);
+  pinMode(LED_PIN, OUTPUT);
+
+  Serial.println("Initializing DFPlayer...");
+
+  // Initialize the DFPlayer Mini
+  if (!myDFPlayer.begin(Serial0)) {
+    Serial.println("DFPlayer Mini not detected. Please check connections and if SD card is inserted.");
+    while (true) {
+      ;
+    }
+  }
+  Serial.println("DFPlayer initialized!");
+
+  // myDFPlayer.setTimeOut(500);
+  myDFPlayer.volume(30);
+  // myDFPlayer.EQ(DFPLAYER_EQ_NORMAL);
+  // myDFPlayer.outputDevice(DFPLAYER_DEVICE_SD);
+  // playAudio(1);
+}
+
+void loop() {
+
+  knobState = digitalRead(KNOB_PIN);
+  if (knobState == HIGH) {
+    myDFPlayer.play(1);
+    digitalWrite(LED_PIN, HIGH);
+    Serial.println("Knob ON!");
+    knobState = 1;
+    Serial.println(knobState);
+
+    while (knobState == HIGH) {
+      buttonState = digitalRead(BUTTON_PIN);
+      if (buttonState == HIGH){
+        myDFPlayer.play(random(2,5));
+        Serial.println("Knob ON Button Pressed!");
+
+      } else {
+        Serial.println("Knob On Button NOT Pressed");
+      }
+    knobState = digitalRead(KNOB_PIN);
+    }
+
+  } else {
+    Serial.println("Knob OFF!");
+    digitalWrite(LED_PIN, LOW);
+    knobState = 0;
+    Serial.println(knobState);
+    delay(10);
+  
+  }
+}
